@@ -10,12 +10,14 @@ function dbGetAll(store){return new Promise(ok=>{const r=tx(store).getAll();r.on
 function dbDelete(store,key){return new Promise(ok=>{const r=tx(store,'readwrite').delete(key);r.onsuccess=()=>{syncDelete(store,key);ok()}})}
 
 function connectWs(){
-    const proto=location.protocol==='https:'?'wss:':'ws:';
-    ws=new WebSocket(proto+'//'+location.host+'/ws');
-    ws.onopen=()=>{wsReady=true;STORES.forEach(s=>ws.send(JSON.stringify({type:'sync',store:s})))};
-    ws.onmessage=e=>{const m=JSON.parse(e.data);if(m.type==='sync'&&m.items){const t=db.transaction(m.store,'readwrite'),s=t.objectStore(m.store);m.items.forEach(i=>s.put(i))}};
-    ws.onclose=()=>{wsReady=false;setTimeout(connectWs,3000)};
-    ws.onerror=()=>ws.close()
+    try{
+        const proto=location.protocol==='https:'?'wss:':'ws:';
+        ws=new WebSocket(proto+'//'+location.host+'/ws');
+        ws.onopen=()=>{wsReady=true;STORES.forEach(s=>ws.send(JSON.stringify({type:'sync',store:s})))};
+        ws.onmessage=e=>{const m=JSON.parse(e.data);if(m.type==='sync'&&m.items){const t=db.transaction(m.store,'readwrite'),s=t.objectStore(m.store);m.items.forEach(i=>s.put(i))}};
+        ws.onclose=()=>{wsReady=false};
+        ws.onerror=()=>{wsReady=false;try{ws.close()}catch(e){}}
+    }catch(e){wsReady=false}
 }
 function syncPut(store,key,data){if(wsReady)ws.send(JSON.stringify({type:'put',store,key,data}))}
 function syncDelete(store,key){if(wsReady)ws.send(JSON.stringify({type:'delete',store,key}))}

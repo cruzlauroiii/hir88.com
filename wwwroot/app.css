@@ -1,0 +1,58 @@
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#0a0a0a;color:#e0e0e0;min-height:100vh}
+a{color:#4fc3f7;text-decoration:none}a:hover{text-decoration:underline}
+nav{background:#111;padding:12px 20px;display:flex;align-items:center;gap:20px;border-bottom:1px solid #222}
+nav .logo{font-size:24px;font-weight:bold;color:#4fc3f7}
+nav a{color:#aaa;font-size:14px}nav a:hover,nav a.active{color:#fff}
+.container{max-width:960px;margin:0 auto;padding:20px}
+.hero{text-align:center;padding:30px 0}
+.hero h1{font-size:36px;color:#4fc3f7;margin-bottom:8px}
+.hero p{color:#888;font-size:16px}
+.search-bar{display:flex;gap:8px;margin:20px 0}
+.search-bar input,.search-bar select{flex:1;padding:10px 14px;border:1px solid #333;border-radius:6px;background:#1a1a1a;color:#e0e0e0;font-size:14px}
+.search-bar button{padding:10px 24px;background:#4fc3f7;color:#000;border:none;border-radius:6px;font-weight:bold;cursor:pointer}
+.filters{display:flex;gap:16px;margin-bottom:16px;align-items:center}
+.filters label{display:flex;align-items:center;gap:4px;font-size:13px;color:#888}
+.filters input[type=checkbox]{accent-color:#4fc3f7}
+.count{color:#666;font-size:13px;margin-left:auto}
+.card{background:#141414;border:1px solid #222;border-radius:8px;padding:16px;margin-bottom:12px}
+.card:hover{border-color:#333}
+.card-header{display:flex;justify-content:space-between;align-items:flex-start}
+.card h3{font-size:16px;margin-bottom:4px}
+.card h3 a{color:#e0e0e0}
+.card .meta{color:#888;font-size:13px;margin-bottom:8px}
+.tags{display:flex;flex-wrap:wrap;gap:4px}
+.tag{padding:2px 8px;border-radius:4px;font-size:11px;background:#1a2a3a;color:#4fc3f7}
+.tag.type{background:#2a2a1a;color:#ffd54f}
+.tag.salary{background:#1a2a1a;color:#81c784}
+.tag.remote{background:#1a3a3a;color:#4dd0e1}
+.tag.visa{background:#3a2a1a;color:#ffb74d}
+.actions{display:flex;flex-direction:column;gap:4px;align-items:flex-end;min-width:80px}
+.btn{padding:6px 16px;border:none;border-radius:4px;cursor:pointer;font-size:13px;font-weight:500}
+.btn-primary{background:#4fc3f7;color:#000}.btn-primary:hover{background:#29b6f6}
+.btn-outline{background:transparent;border:1px solid #444;color:#aaa}.btn-outline:hover{border-color:#888}
+.btn-danger{background:transparent;border:1px solid #c62828;color:#ef5350}.btn-danger:hover{background:#c62828;color:#fff}
+.btn-success{background:#2e7d32;color:#fff}
+.btn-sm{padding:4px 12px;font-size:12px}
+.time{color:#666;font-size:11px;margin-top:4px}
+table{width:100%;border-collapse:collapse}
+th,td{padding:10px 12px;text-align:left;border-bottom:1px solid #222}
+th{color:#888;font-size:12px;text-transform:uppercase}
+select{padding:4px 8px;background:#1a1a1a;color:#e0e0e0;border:1px solid #333;border-radius:4px}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:20px}
+.stat{background:#141414;border:1px solid #222;border-radius:8px;padding:16px;text-align:center}
+.stat h2{font-size:28px;color:#4fc3f7}.stat small{color:#888}
+.form-group{margin-bottom:16px}
+.form-group label{display:block;font-size:13px;color:#888;margin-bottom:4px}
+.form-group input,.form-group textarea{width:100%;padding:10px;border:1px solid #333;border-radius:6px;background:#1a1a1a;color:#e0e0e0}
+.form-group textarea{resize:vertical;min-height:80px}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.detail{padding:20px 0}
+.detail h1{font-size:24px;margin-bottom:4px}
+.detail .meta{color:#888;font-size:15px;margin-bottom:16px}
+.detail .desc{font-size:15px;line-height:1.6;margin:16px 0;padding:16px;background:#1a1a1a;border-radius:8px}
+.detail .btn-row{display:flex;gap:8px;margin-top:16px}
+.alert-row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #222}
+.toast{position:fixed;bottom:20px;right:20px;background:#2e7d32;color:#fff;padding:12px 20px;border-radius:6px;display:none;z-index:999}
+.toast.show{display:block}
+@media(max-width:640px){.search-bar{flex-direction:column}.filters{flex-wrap:wrap}.form-row{grid-template-columns:1fr}.stats{grid-template-columns:repeat(2,1fr)}.card-header{flex-direction:column}.actions{flex-direction:row;margin-top:8px}}

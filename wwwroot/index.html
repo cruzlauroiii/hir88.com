@@ -1,38 +1,23 @@
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>hir88.com</title>
-    <base href="/hir88.com/" />
-    <link rel="preload" id="webassembly" />
-    <link rel="stylesheet" href="lib/bootstrap/dist/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="css/app.css" />
-    <link rel="icon" type="image/png" href="favicon.png" />
-    <link href="hir88.com.styles.css" rel="stylesheet" />
-    <link href="manifest.webmanifest" rel="manifest" />
-    <link rel="apple-touch-icon" sizes="512x512" href="icon-512.png" />
-    <link rel="apple-touch-icon" sizes="192x192" href="icon-192.png" />
-    <script type="importmap"></script>
-</head>
-
-<body>
-    <div id="app">
-        <svg class="loading-progress">
-            <circle r="40%" cx="50%" cy="50%" />
-            <circle r="40%" cx="50%" cy="50%" />
-        </svg>
-        <div class="loading-progress-text"></div>
-    </div>
-
-    <div id="blazor-error-ui">
-        An unhandled error has occurred.
-        <a href="." class="reload">Reload</a>
-        <span class="dismiss">🗙</span>
-    </div>
-    <script src="_framework/blazor.webassembly#[.{fingerprint}].js"></script>
-    <script>navigator.serviceWorker.register('service-worker.js', { updateViaCache: 'none' });</script>
-</body>
-
-</html>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>hir88 - Jobs</title><link rel="stylesheet" href="app.css"></head><body>
+<nav><span class="logo">hir88</span><a href="./" class="active">Jobs</a><a href="applications.html">Applications</a><a href="saved.html">Saved</a><a href="profile.html">Profile</a></nav>
+<div class="container">
+<div class="hero"><h1>hir88</h1><p>Find jobs. Apply instantly. Track everything.</p></div>
+<div class="search-bar"><input id="q" placeholder="Job title, skill, or company"><input id="loc" placeholder="Location"><select id="type"><option value="">All types</option><option>Full-time</option><option>Contract</option><option>Part-time</option></select><button onclick="search()">Search</button></div>
+<div class="filters"><label><input type="checkbox" id="remote"> Remote only</label><label><input type="checkbox" id="visa"> Visa sponsorship</label><span class="count" id="count"></span></div>
+<div id="jobs"></div>
+</div>
+<div class="toast" id="toast"></div>
+<script src="app.js"></script>
+<script>
+const{openDb,dbGetAll,dbPut,seedJobs,connectWs,uid,ago,esc}=hir88;
+let allJobs=[],appliedIds=new Set(),savedIds=new Set();
+async function init(){await openDb();connectWs();await seedJobs();allJobs=await dbGetAll('jobs');const apps=await dbGetAll('applications');apps.forEach(a=>appliedIds.add(a.jobId));const saved=await dbGetAll('saved');saved.forEach(s=>savedIds.add(s.jobId));search();document.getElementById('q').addEventListener('keydown',e=>{if(e.key==='Enter')search()})}
+function search(){const q=document.getElementById('q').value.toLowerCase(),loc=document.getElementById('loc').value.toLowerCase(),type=document.getElementById('type').value,remote=document.getElementById('remote').checked,visa=document.getElementById('visa').checked;
+const filtered=allJobs.filter(j=>(!q||j.title.toLowerCase().includes(q)||j.company.toLowerCase().includes(q)||(j.tags||[]).some(t=>t.toLowerCase().includes(q)))&&(!loc||j.location.toLowerCase().includes(loc))&&(!type||j.type===type)&&(!remote||j.remote)&&(!visa||j.visa)).sort((a,b)=>new Date(b.posted)-new Date(a.posted));
+document.getElementById('count').textContent=filtered.length+' jobs found';
+document.getElementById('jobs').innerHTML=filtered.map(j=>`<div class="card"><div class="card-header"><div><h3><a href="job.html?id=${j.key}">${esc(j.title)}</a></h3><div class="meta">${esc(j.company)} &mdash; ${esc(j.location)}</div><div class="tags"><span class="tag type">${esc(j.type)}</span><span class="tag salary">${esc(j.salary)}</span>${j.remote?'<span class="tag remote">Remote</span>':''}${j.visa?'<span class="tag visa">Visa</span>':''}${(j.tags||[]).map(t=>`<span class="tag">${esc(t)}</span>`).join('')}</div></div><div class="actions">${appliedIds.has(j.key)?'<span class="btn btn-success btn-sm">Applied</span>':`<button class="btn btn-primary btn-sm" onclick="apply('${j.key}')">Apply</button>`}<button class="btn btn-outline btn-sm" onclick="toggleSave('${j.key}')">${savedIds.has(j.key)?'Saved':'Save'}</button><span class="time">${ago(j.posted)}</span></div></div></div>`).join('')}
+async function apply(id){if(appliedIds.has(id))return;const j=allJobs.find(x=>x.key===id);if(!j)return;await dbPut('applications',uid(),{jobId:id,jobTitle:j.title,company:j.company,status:'Applied',appliedAt:new Date().toISOString()});appliedIds.add(id);search();toast('Applied to '+j.title)}
+async function toggleSave(id){if(savedIds.has(id)){const all=await dbGetAll('saved');const s=all.find(x=>x.jobId===id);if(s)await hir88.dbDelete('saved',s.key);savedIds.delete(id)}else{await dbPut('saved',uid(),{jobId:id,savedAt:new Date().toISOString()})}search()}
+function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2000)}
+init();
+</script></body></html>

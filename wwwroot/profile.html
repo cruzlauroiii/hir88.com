@@ -1,0 +1,29 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>hir88 - Profile</title><link rel="stylesheet" href="app.css"></head><body>
+<nav><span class="logo">hir88</span><a href="./">Jobs</a><a href="applications.html">Applications</a><a href="saved.html">Saved</a><a href="profile.html" class="active">Profile</a></nav>
+<div class="container">
+<h1 style="margin-bottom:16px">My Profile</h1>
+<div class="card" style="padding:20px">
+<div class="form-row"><div class="form-group"><label>Full Name</label><input id="name"></div><div class="form-group"><label>Email</label><input id="email" type="email"></div></div>
+<div class="form-row"><div class="form-group"><label>Phone</label><input id="phone"></div><div class="form-group"><label>Job Title</label><input id="title"></div></div>
+<div class="form-group"><label>Summary</label><textarea id="summary"></textarea></div>
+<div class="form-group"><label>Skills (comma separated)</label><input id="skills"></div>
+<button class="btn btn-primary" onclick="save()">Save Profile</button><span id="saved" style="color:#81c784;margin-left:12px;display:none">Saved!</span>
+</div>
+<div class="card" style="padding:20px;margin-top:16px">
+<h2 style="margin-bottom:12px">Search Alerts</h2>
+<div class="search-bar" style="margin-bottom:12px"><input id="alertQ" placeholder="Keywords"><input id="alertLoc" placeholder="Location"><button onclick="addAlert()">Add Alert</button></div>
+<div id="alerts"></div>
+</div>
+</div>
+<script src="app.js"></script>
+<script>
+const{openDb,dbGet,dbPut,dbGetAll,dbDelete,connectWs,uid}=hir88;
+let alerts=[];
+async function init(){await openDb();connectWs();const p=await dbGet('profile','main');if(p){document.getElementById('name').value=p.name||'';document.getElementById('email').value=p.email||'';document.getElementById('phone').value=p.phone||'';document.getElementById('title').value=p.title||'';document.getElementById('summary').value=p.summary||'';document.getElementById('skills').value=(p.skills||[]).join(', ')}alerts=await dbGetAll('alerts');renderAlerts()}
+async function save(){const prof={name:document.getElementById('name').value,email:document.getElementById('email').value,phone:document.getElementById('phone').value,title:document.getElementById('title').value,summary:document.getElementById('summary').value,skills:document.getElementById('skills').value.split(',').map(s=>s.trim()).filter(Boolean)};await dbPut('profile','main',prof);const s=document.getElementById('saved');s.style.display='inline';setTimeout(()=>s.style.display='none',2000)}
+async function addAlert(){const q=document.getElementById('alertQ').value,loc=document.getElementById('alertLoc').value;if(!q)return;const a={query:q,location:loc,createdAt:new Date().toISOString()};const key=uid();await dbPut('alerts',key,a);a.key=key;alerts.push(a);document.getElementById('alertQ').value='';document.getElementById('alertLoc').value='';renderAlerts()}
+function renderAlerts(){document.getElementById('alerts').innerHTML=alerts.map(a=>`<div class="alert-row"><span>${a.query}${a.location?' in '+a.location:''}</span><button class="btn btn-danger btn-sm" onclick="removeAlert('${a.key}')">Remove</button></div>`).join('')}
+async function removeAlert(key){alerts=alerts.filter(a=>a.key!==key);await dbDelete('alerts',key);renderAlerts()}
+window.save=save;window.addAlert=addAlert;window.removeAlert=removeAlert;
+init();
+</script></body></html>

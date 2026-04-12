@@ -11,7 +11,7 @@
 <script>
 const{openDb,dbGetAll,dbPut,seedJobs,connectWs,uid,ago,esc}=hir88;
 let allJobs=[],appliedIds=new Set(),savedIds=new Set();
-async function init(){await openDb();connectWs();await seedJobs();allJobs=await dbGetAll('jobs');const apps=await dbGetAll('applications');apps.forEach(a=>appliedIds.add(a.jobId));const saved=await dbGetAll('saved');saved.forEach(s=>savedIds.add(s.jobId));search();document.getElementById('q').addEventListener('keydown',e=>{if(e.key==='Enter')search()})}
+async function init(){try{await openDb();try{connectWs()}catch(e){}await seedJobs();allJobs=await dbGetAll('jobs');const apps=await dbGetAll('applications');apps.forEach(a=>appliedIds.add(a.jobId));const saved=await dbGetAll('saved');saved.forEach(s=>savedIds.add(s.jobId));search();document.getElementById('q').addEventListener('keydown',e=>{if(e.key==='Enter')search()})}catch(e){console.error(e);document.getElementById('jobs').textContent='Error: '+e.message}}
 function search(){const q=document.getElementById('q').value.toLowerCase(),loc=document.getElementById('loc').value.toLowerCase(),type=document.getElementById('type').value,remote=document.getElementById('remote').checked,visa=document.getElementById('visa').checked;
 const filtered=allJobs.filter(j=>(!q||j.title.toLowerCase().includes(q)||j.company.toLowerCase().includes(q)||(j.tags||[]).some(t=>t.toLowerCase().includes(q)))&&(!loc||j.location.toLowerCase().includes(loc))&&(!type||j.type===type)&&(!remote||j.remote)&&(!visa||j.visa)).sort((a,b)=>new Date(b.posted)-new Date(a.posted));
 document.getElementById('count').textContent=filtered.length+' jobs found';

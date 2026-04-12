@@ -6,7 +6,7 @@
 <script>
 const{openDb,dbGetAll,dbPut,dbDelete,connectWs,uid,ago,esc}=hir88;
 let job,applied=false,saved=false;
-async function init(){await openDb();connectWs();const id=new URLSearchParams(location.search).get('id');const jobs=await dbGetAll('jobs');job=jobs.find(j=>j.key===id);if(!job){document.getElementById('detail').textContent='Job not found';return}
+async function init(){await openDb();try{connectWs()}catch(e){}const id=new URLSearchParams(location.search).get('id');const jobs=await dbGetAll('jobs');job=jobs.find(j=>j.key===id);if(!job){document.getElementById('detail').textContent='Job not found';return}
 const apps=await dbGetAll('applications');applied=apps.some(a=>a.jobId===id);const savedList=await dbGetAll('saved');saved=savedList.some(s=>s.jobId===id);render()}
 function render(){document.title='hir88 - '+job.title;document.getElementById('detail').innerHTML=`
 <a href="./">&larr; Back to jobs</a>

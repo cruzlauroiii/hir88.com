@@ -5,7 +5,7 @@
 <script>
 const{openDb,dbGetAll,dbPut,dbDelete,connectWs,ago}=hir88;
 let apps=[];
-async function init(){await openDb();connectWs();apps=await dbGetAll('applications');render()}
+async function init(){await openDb();try{connectWs()}catch(e){}apps=await dbGetAll('applications');render()}
 function render(){
 if(apps.length===0){document.getElementById('content').innerHTML='<p style="color:#888">No applications yet. Start applying to jobs!</p>';return}
 const sorted=apps.sort((a,b)=>new Date(b.appliedAt)-new Date(a.appliedAt));

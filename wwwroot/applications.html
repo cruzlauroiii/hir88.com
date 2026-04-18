@@ -1,0 +1,19 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>hir88 - Applications</title><link rel="stylesheet" href="app.css"></head><body>
+<nav><span class="logo">hir88</span><a href="./">Jobs</a><a href="applications.html" class="active">Applications</a><a href="saved.html">Saved</a><a href="profile.html">Profile</a></nav>
+<div class="container"><h1 style="margin-bottom:16px">My Applications</h1><div id="content"></div><div class="stats" id="stats"></div></div>
+<script src="app.js"></script>
+<script>
+const{openDb,dbGetAll,dbPut,dbDelete,connectWs,ago}=hir88;
+let apps=[];
+async function init(){await openDb();try{connectWs()}catch(e){}apps=await dbGetAll('applications');render()}
+function render(){
+if(apps.length===0){document.getElementById('content').innerHTML='<p style="color:#888">No applications yet. Start applying to jobs!</p>';return}
+const sorted=apps.sort((a,b)=>new Date(b.appliedAt)-new Date(a.appliedAt));
+document.getElementById('content').innerHTML=`<table><thead><tr><th>Job</th><th>Company</th><th>Status</th><th>Applied</th><th></th></tr></thead><tbody>${sorted.map(a=>`<tr><td>${a.jobTitle||''}</td><td>${a.company||''}</td><td><select onchange="updateStatus('${a.key}',this.value)">${['Applied','Viewed','Interview','Offered','Rejected','Withdrawn'].map(s=>`<option${a.status===s?' selected':''}>${s}</option>`).join('')}</select></td><td style="color:#888">${new Date(a.appliedAt).toLocaleDateString()}</td><td><button class="btn btn-danger btn-sm" onclick="remove('${a.key}')">Remove</button></td></tr>`).join('')}</tbody></table>`;
+const total=apps.length,interviews=apps.filter(a=>a.status==='Interview').length,offers=apps.filter(a=>a.status==='Offered').length,rejected=apps.filter(a=>a.status==='Rejected').length;
+document.getElementById('stats').innerHTML=`<div class="stat"><h2>${total}</h2><small>Total</small></div><div class="stat"><h2>${interviews}</h2><small>Interviews</small></div><div class="stat"><h2>${offers}</h2><small>Offers</small></div><div class="stat"><h2>${rejected}</h2><small>Rejected</small></div>`}
+async function updateStatus(key,status){const a=apps.find(x=>x.key===key);if(a){a.status=status;await dbPut('applications',key,a);render()}}
+async function remove(key){apps=apps.filter(a=>a.key!==key);await dbDelete('applications',key);render()}
+window.updateStatus=updateStatus;window.remove=remove;
+init();
+</script></body></html>

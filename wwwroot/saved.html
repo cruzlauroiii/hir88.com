@@ -1,0 +1,18 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>hir88 - Saved Jobs</title><link rel="stylesheet" href="app.css"></head><body>
+<nav><span class="logo">hir88</span><a href="./">Jobs</a><a href="applications.html">Applications</a><a href="saved.html" class="active">Saved</a><a href="profile.html">Profile</a></nav>
+<div class="container"><h1 style="margin-bottom:16px">Saved Jobs</h1><div id="content"></div></div>
+<div class="toast" id="toast"></div>
+<script src="app.js"></script>
+<script>
+const{openDb,dbGetAll,dbPut,dbDelete,connectWs,uid,esc}=hir88;
+let savedList=[],jobMap={};
+async function init(){await openDb();try{connectWs()}catch(e){}savedList=await dbGetAll('saved');const jobs=await dbGetAll('jobs');jobs.forEach(j=>jobMap[j.key]=j);render()}
+function render(){
+if(savedList.length===0){document.getElementById('content').innerHTML='<p style="color:#888">No saved jobs. Browse and save jobs you\'re interested in.</p>';return}
+document.getElementById('content').innerHTML=savedList.map(s=>{const j=jobMap[s.jobId];if(!j)return'';return`<div class="card"><div class="card-header"><div><h3><a href="job.html?id=${j.key}">${esc(j.title)}</a></h3><div class="meta">${esc(j.company)} &mdash; ${esc(j.location)}</div></div><div class="actions" style="flex-direction:row;gap:8px"><button class="btn btn-primary btn-sm" onclick="apply('${j.key}')">Apply</button><button class="btn btn-danger btn-sm" onclick="unsave('${s.key}')">Remove</button></div></div></div>`}).join('')}
+async function unsave(key){savedList=savedList.filter(s=>s.key!==key);await dbDelete('saved',key);render()}
+async function apply(jobId){const j=jobMap[jobId];if(!j)return;const apps=await dbGetAll('applications');if(apps.some(a=>a.jobId===jobId)){toast('Already applied');return}await dbPut('applications',uid(),{jobId,jobTitle:j.title,company:j.company,status:'Applied',appliedAt:new Date().toISOString()});toast('Applied to '+j.title)}
+function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2000)}
+window.unsave=unsave;window.apply=apply;
+init();
+</script></body></html>

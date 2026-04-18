@@ -1,0 +1,22 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>hir88 - Job Detail</title><link rel="stylesheet" href="app.css"></head><body>
+<nav><span class="logo">hir88</span><a href="./">Jobs</a><a href="applications.html">Applications</a><a href="saved.html">Saved</a><a href="profile.html">Profile</a></nav>
+<div class="container"><div id="detail">Loading...</div></div>
+<div class="toast" id="toast"></div>
+<script src="app.js"></script>
+<script>
+const{openDb,dbGetAll,dbPut,dbDelete,connectWs,uid,ago,esc}=hir88;
+let job,applied=false,saved=false;
+async function init(){await openDb();try{connectWs()}catch(e){}const id=new URLSearchParams(location.search).get('id');const jobs=await dbGetAll('jobs');job=jobs.find(j=>j.key===id);if(!job){document.getElementById('detail').textContent='Job not found';return}
+const apps=await dbGetAll('applications');applied=apps.some(a=>a.jobId===id);const savedList=await dbGetAll('saved');saved=savedList.some(s=>s.jobId===id);render()}
+function render(){document.title='hir88 - '+job.title;document.getElementById('detail').innerHTML=`
+<a href="./">&larr; Back to jobs</a>
+<div class="detail"><h1>${esc(job.title)}</h1><div class="meta">${esc(job.company)} &mdash; ${esc(job.location)}</div>
+<div class="tags" style="margin:12px 0"><span class="tag type">${esc(job.type)}</span><span class="tag salary">${esc(job.salary)}</span>${job.remote?'<span class="tag remote">Remote</span>':''}${job.visa?'<span class="tag visa">Visa Sponsorship</span>':''}${(job.tags||[]).map(t=>`<span class="tag">${esc(t)}</span>`).join('')}</div>
+<div class="desc">${esc(job.desc)}</div>
+<div class="btn-row">${applied?'<span class="btn btn-success">Applied</span>':`<button class="btn btn-primary" onclick="apply()">Apply Now</button>`}<button class="btn btn-outline" onclick="toggleSave()">${saved?'Saved':'Save Job'}</button></div>
+<span class="time">Posted ${ago(job.posted)}</span></div>`}
+async function apply(){if(applied)return;await dbPut('applications',uid(),{jobId:job.key,jobTitle:job.title,company:job.company,status:'Applied',appliedAt:new Date().toISOString()});applied=true;render();toast('Applied to '+job.title)}
+async function toggleSave(){if(saved){const all=await dbGetAll('saved');const s=all.find(x=>x.jobId===job.key);if(s)await dbDelete('saved',s.key);saved=false}else{await dbPut('saved',uid(),{jobId:job.key,savedAt:new Date().toISOString()});saved=true}render()}
+function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2000)}
+init();
+</script></body></html>
